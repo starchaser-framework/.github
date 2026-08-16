@@ -24,7 +24,33 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4.9.0
+      - name: Detect dependency-review support
+        id: dependency-graph
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          status=$(curl --silent --show-error --output /tmp/dependency-diff.json --write-out '%{http_code}' \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer ${GH_TOKEN}" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/dependency-graph/compare/${BASE_SHA}...${HEAD_SHA}")
+          if [ "$status" = 200 ]; then
+            echo 'supported=true' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "$status" = 403 ] || [ "$status" = 404 ]; then
+            echo 'supported=false' >> "$GITHUB_OUTPUT"
+            echo '::warning::GitHub dependency review is unavailable for this repository. Verify Dependency graph and GitHub Advanced Security/code-security configuration in repository or organization settings.'
+            exit 0
+          fi
+          echo "Unexpected dependency-graph API response: HTTP $status" >&2
+          cat /tmp/dependency-diff.json >&2 || true
+          exit 1
+      - name: Review dependency changes
+        if: ${{ steps.dependency-graph.outputs.supported == 'true' }}
+        uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4.9.0
 
   canonical:
     name: Node 24 canonical
