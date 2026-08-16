@@ -1,0 +1,36 @@
+{
+  "node": {
+    "canonical": "24",
+    "compatibility": ["26"]
+  },
+  "pnpm": {
+    "canonical": "11.22.0",
+    "exact": true
+  },
+  "typescript": {
+    "canonical": "6.0.3",
+    "compatibility": ["7.0.2"],
+    "compatibilityRequired": false
+  },
+  "scripts": [
+    "format",
+    "format:check",
+    "lint",
+    "architecture",
+    "typecheck",
+    "test",
+    "build",
+    "check",
+    "ci"
+  ],
+  "repositoryLocal": [
+    "oxfmt",
+    "oxlint",
+    "oxc-parser-resolver",
+    "typescript-config",
+    "architecture-validator",
+    "turbo-graph",
+    "framework-specific-validation",
+    "build-configuration"
+  ]
+}

@@ -1,0 +1,48 @@
+name: Toolchain policy
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify required organization files
+        run: |
+          test -f docs/toolchain-contract.md
+          test -f policy/javascript-toolchain.json
+          test -f .github/workflows/js-quality.yml
+          test -f workflow-templates/javascript-repository.yml
+          test -f workflow-templates/javascript-repository.properties.json
+      - name: Validate machine-readable baseline
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const policy = JSON.parse(fs.readFileSync('policy/javascript-toolchain.json', 'utf8'));
+          const expectedScripts = ['format','format:check','lint','architecture','typecheck','test','build','check','ci'];
+          const errors = [];
+          if (policy.node?.canonical !== '24') errors.push('Node canonical must be 24');
+          if (JSON.stringify(policy.node?.compatibility) !== JSON.stringify(['26'])) errors.push('Node compatibility must be [26]');
+          if (policy.pnpm?.canonical !== '11.22.0' || policy.pnpm?.exact !== true) errors.push('pnpm must be exactly 11.22.0');
+          if (policy.typescript?.canonical !== '6.0.3') errors.push('TypeScript canonical must be 6.0.3');
+          if (!policy.typescript?.compatibility?.includes('7.0.2')) errors.push('TypeScript compatibility must include 7.0.2');
+          if (policy.typescript?.compatibilityRequired !== false) errors.push('TypeScript compatibility must remain optional');
+          if (JSON.stringify(policy.scripts) !== JSON.stringify(expectedScripts)) errors.push('Shared script interface is incomplete or reordered');
+          if (errors.length) {
+            console.error(errors.join('\n'));
+            process.exit(1);
+          }
+          NODE
+      - name: Verify durable contract states the repository ownership boundary
+        run: |
+          grep -Fq 'The central contract defines what repositories expose and the supported baseline. Each repository defines how its own validation works.' docs/toolchain-contract.md
+          grep -Fq '11.22.0' docs/toolchain-contract.md
+          grep -Fq '6.0.3' docs/toolchain-contract.md
