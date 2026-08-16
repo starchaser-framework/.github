@@ -3,7 +3,7 @@ name: JavaScript quality
 on:
   workflow_call:
     inputs:
-      node26-compatibility:
+      node26_compatibility:
         description: Run a separate Node 26 compatibility job
         required: false
         type: boolean
@@ -31,7 +31,7 @@ jobs:
 
   node26-compatibility:
     name: Node 26 compatibility
-    if: ${{ inputs.node26-compatibility }}
+    if: ${{ inputs.node26_compatibility }}
     continue-on-error: true
     runs-on: ubuntu-latest
     timeout-minutes: 30
