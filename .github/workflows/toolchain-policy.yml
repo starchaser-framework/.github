@@ -70,4 +70,5 @@ jobs:
             exit 1
           fi
       - name: Verify Action update candidates remain enabled
-        run: grep -Fq "package-ecosystem: 'github-actions'" .github/dependabot.yml
+        run: |
+          grep -Fq "package-ecosystem: 'github-actions'" .github/dependabot.yml
