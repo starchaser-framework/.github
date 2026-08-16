@@ -11,4 +11,4 @@ permissions:
 
 jobs:
   quality:
-    uses: starchaser-framework/.github/.github/workflows/js-quality.yml@main
+    uses: starchaser-framework/.github/.github/workflows/js-quality.yml@973833d8bbb15edff1612e0cb45d11119623bcbe
