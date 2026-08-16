@@ -19,6 +19,7 @@ jobs:
         run: |
           test -f docs/toolchain-contract.md
           test -f policy/javascript-toolchain.json
+          test -f .github/dependabot.yml
           test -f .github/workflows/js-quality.yml
           test -f workflow-templates/javascript-repository.yml
           test -f workflow-templates/javascript-repository.properties.json
@@ -61,3 +62,12 @@ jobs:
             echo 'Mutable major-tag Action reference detected.' >&2
             exit 1
           fi
+      - name: Verify repository CI script invocation
+        run: |
+          grep -Fq 'run: pnpm run ci' .github/workflows/js-quality.yml
+          if grep -Eq '^\s*- run: pnpm ci\s*$' .github/workflows/js-quality.yml; then
+            echo 'pnpm ci invokes pnpm clean-install; use pnpm run ci for the repository script.' >&2
+            exit 1
+          fi
+      - name: Verify Action update candidates remain enabled
+        run: grep -Fq "package-ecosystem: 'github-actions'" .github/dependabot.yml

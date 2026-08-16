@@ -60,7 +60,7 @@ Applicable JavaScript repositories expose these package scripts:
 
 A repository may omit an operation only when that repository type genuinely has no meaningful version of the concern. Existing validation must not be weakened to make the command surface look uniform.
 
-`pnpm ci` is the canonical repository-owned automation contract. Shared GitHub automation performs setup and invokes that command; it does not reproduce each repository's internal validation steps.
+The root `ci` package script is the canonical repository-owned automation contract. Shared GitHub automation invokes it with `pnpm run ci`; it does not use pnpm's built-in `pnpm ci` clean-install command or reproduce each repository's internal validation steps.
 
 ## Responsibility boundary
 
@@ -101,7 +101,7 @@ Dependabot may propose future Action-SHA or dependency changes. A Dependabot PR 
 5. enables pnpm dependency caching through `actions/setup-node`;
 6. performs `pnpm install --frozen-lockfile`;
 7. optionally executes a caller-supplied `pre_ci_command` when repository-owned setup is required before validation;
-8. runs `pnpm ci`.
+8. runs `pnpm run ci`.
 
 The optional pre-CI command is an orchestration hook only. Its contents and necessity are owned by the caller repository and must not move framework-specific validation into the organization repository.
 

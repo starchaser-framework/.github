@@ -80,7 +80,7 @@ jobs:
       - name: Run repository pre-CI setup
         if: ${{ inputs.pre_ci_command != '' }}
         run: ${{ inputs.pre_ci_command }}
-      - run: pnpm ci
+      - run: pnpm run ci
 
   node26-compatibility:
     name: Node 26 compatibility
@@ -112,4 +112,4 @@ jobs:
       - name: Run repository pre-CI setup
         if: ${{ inputs.pre_ci_command != '' }}
         run: ${{ inputs.pre_ci_command }}
-      - run: pnpm ci
+      - run: pnpm run ci
