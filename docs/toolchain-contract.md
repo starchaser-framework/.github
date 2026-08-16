@@ -61,7 +61,10 @@ The organization `.github` repository must not become a shared npm tooling packa
 3. configures the pnpm version declared by the repository's exact `packageManager` field;
 4. enables pnpm dependency caching through `actions/setup-node`;
 5. performs `pnpm install --frozen-lockfile`;
-6. runs `pnpm ci`.
+6. optionally executes a caller-supplied `pre_ci_command` when repository-owned setup is required before validation;
+7. runs `pnpm ci`.
+
+The optional pre-CI command is an orchestration hook only. Its contents and necessity are owned by the caller repository and must not move framework-specific validation into the organization repository.
 
 Callers may explicitly enable a separate Node 26 compatibility job. That job is compatibility evidence and must not silently replace Node 24 as the canonical gate.
 
