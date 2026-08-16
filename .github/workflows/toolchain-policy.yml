@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Verify required organization files
         run: |
           test -f docs/toolchain-contract.md
@@ -31,18 +31,33 @@ jobs:
           const errors = [];
           if (policy.node?.canonical !== '24') errors.push('Node canonical must be 24');
           if (JSON.stringify(policy.node?.compatibility) !== JSON.stringify(['26'])) errors.push('Node compatibility must be [26]');
-          if (policy.pnpm?.canonical !== '11.22.0' || policy.pnpm?.exact !== true) errors.push('pnpm must be exactly 11.22.0');
+          if (policy.pnpm?.canonical !== '11.20.0' || policy.pnpm?.exact !== true) errors.push('pnpm must be exactly 11.20.0');
           if (policy.typescript?.canonical !== '6.0.3') errors.push('TypeScript canonical must be 6.0.3');
           if (!policy.typescript?.compatibility?.includes('7.0.2')) errors.push('TypeScript compatibility must include 7.0.2');
           if (policy.typescript?.compatibilityRequired !== false) errors.push('TypeScript compatibility must remain optional');
+          if (policy.supplyChain?.minimumReleaseAgeMinutes !== 10080) errors.push('minimum release age must be 10080 minutes');
+          if (policy.supplyChain?.minimumReleaseAgeStrict !== true) errors.push('minimum release age must be strict');
+          if (policy.supplyChain?.blockExoticSubdeps !== true) errors.push('exotic subdependencies must be blocked');
+          if (policy.supplyChain?.frozenLockfileRequired !== true) errors.push('frozen lockfiles must be required');
+          if (policy.supplyChain?.immutableExternalActions !== true) errors.push('external Actions must be immutable');
+          if (policy.supplyChain?.immutableReusableWorkflows !== true) errors.push('reusable workflows must be immutable');
           if (JSON.stringify(policy.scripts) !== JSON.stringify(expectedScripts)) errors.push('Shared script interface is incomplete or reordered');
           if (errors.length) {
             console.error(errors.join('\n'));
             process.exit(1);
           }
           NODE
-      - name: Verify durable contract states the repository ownership boundary
+      - name: Verify durable contract
         run: |
           grep -Fq 'The central contract defines what repositories expose and the supported baseline. Each repository defines how its own validation works.' docs/toolchain-contract.md
-          grep -Fq '11.22.0' docs/toolchain-contract.md
+          grep -Fq '11.20.0' docs/toolchain-contract.md
           grep -Fq '6.0.3' docs/toolchain-contract.md
+          grep -Fq 'minimumReleaseAge: 10080' docs/toolchain-contract.md
+          grep -Fq 'supplier/project approval → version eligibility → compatibility validation → adoption' docs/toolchain-contract.md
+          grep -Fq 'not `@main`' docs/toolchain-contract.md
+      - name: Reject mutable external Action references
+        run: |
+          if grep -R -nE '^\s*-?\s*uses:\s*[^[:space:]@]+@v[0-9]+' .github workflow-templates; then
+            echo 'Mutable major-tag Action reference detected.' >&2
+            exit 1
+          fi
