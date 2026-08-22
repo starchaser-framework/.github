@@ -1,6 +1,0 @@
-{
-  "name": "Star Chaser JavaScript CI",
-  "description": "Adopt the organization JavaScript toolchain contract and reusable quality workflow.",
-  "iconName": "octicon-check-circle",
-  "categories": ["JavaScript", "TypeScript"]
-}
